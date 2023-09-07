@@ -16,10 +16,11 @@ import (
 )
 
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to the application!")
+	fmt.Fprintln(w, "Welcome to the Blog application!")
 }
 
 func main() {
+
 	// Set the MongoDB URI
 	err := godotenv.Load(".env")
 	if err != nil {
