@@ -13,10 +13,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	
 )
 
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to the Blog application!")
+	fmt.Fprintln(w, "Welcome to My Blog application!")
 }
 
 func main() {
@@ -57,10 +58,12 @@ func main() {
 	// Now you can use the 'client' to interact with the MongoDB database
 
 	// then time for using routers
-
+    
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", WelcomeHandler)
+
+	r.HandleFunc("/api/v1/article", handlers.GetArticle)
 	port := "8000"
 	fmt.Printf("Server running on port %s ...\n", port)
 	http.Handle("/", r)
