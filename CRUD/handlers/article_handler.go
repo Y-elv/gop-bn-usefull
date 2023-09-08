@@ -26,3 +26,7 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 	
 	fmt.Fprintln(w, "Delete article")
 }
+func DeleteAllArticle(w http.ResponseWriter, r *http.Request) {
+	
+	fmt.Fprintln(w, "Delete all article")
+}
