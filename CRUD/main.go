@@ -18,7 +18,11 @@ import (
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to My Blog application!")
 }
+var db *mongo.Database
 
+func GetDBCollection(level string) *mongo.Collection {
+	return db.Collection(level)
+}
 func main() {
 
 	// Set the MongoDB URI
@@ -38,7 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	db = client.Database("levels")
 	// Disconnect from the MongoDB server when the main function exits
 	defer client.Disconnect(ctx)
 
