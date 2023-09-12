@@ -7,18 +7,59 @@ import (
 
 	"github.com/Y-elv/gop-bn-usefull.git/common"
 	"github.com/Y-elv/gop-bn-usefull.git/models"
+	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetAllArticles(w http.ResponseWriter, r *http.Request) {
-	coll:=common.GetDBCollection("articles")
-    
-	var b models.Article
-	cursor,
-	}   
+	coll := common.GetDBCollection("articles")
+
+	articles := make([]models.Article, 0)
+	cursor, err := coll.Find(r.Context(), bson.M{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for cursor.Next(r.Context()) {
+		article := models.Article{}
+		err := cursor.Decode(&article)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		articles = append(articles, article)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(articles)
+}
 
 func GetArticleByID(w http.ResponseWriter, r *http.Request) {
+	// Get the ID parameter from the URL
+	id := mux.Vars(r)["id"]
 
-	fmt.Fprintln(w, "Get article by ID")
+	// Convert the ID to an ObjectID if you're using MongoDB
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get the collection
+	coll := common.GetDBCollection("articles")
+
+	// Find the article by ID
+	var article models.Article
+	err = coll.FindOne(r.Context(), bson.M{"_id": objectID}).Decode(&article)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	// Return the article as JSON response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(article)
 }
 
 // CreateArticleHandler handles POST requests to create a new article.
@@ -49,7 +90,7 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"result": result,
-		"data":b,
+		"data":   b,
 	})
 }
 func UpdateArticle(w http.ResponseWriter, r *http.Request) {
