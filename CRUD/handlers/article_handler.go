@@ -10,8 +10,11 @@ import (
 )
 
 func GetAllArticles(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Get all articles")
-}
+	coll:=common.GetDBCollection("articles")
+    
+	var b models.Article
+	cursor,
+	}   
 
 func GetArticleByID(w http.ResponseWriter, r *http.Request) {
 
@@ -30,7 +33,7 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create the book
+	// Create the article
 	coll := common.GetDBCollection("articles")
 	result, err := coll.InsertOne(r.Context(), b)
 	if err != nil {
@@ -42,7 +45,7 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return the book as JSON response
+	// Return the article as JSON response
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"result": result,
