@@ -38,9 +38,10 @@ func GetAllArticles(w http.ResponseWriter, r *http.Request) {
 func GetArticleByID(w http.ResponseWriter, r *http.Request) {
 	// Get the ID parameter from the URL
 	id := mux.Vars(r)["id"]
+	fmt.Println(id)
 
 	// Convert the ID to an ObjectID if you're using MongoDB
-	objectID, err := primitive.ObjectIDFromHex(id)
+	_, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -51,7 +52,7 @@ func GetArticleByID(w http.ResponseWriter, r *http.Request) {
 
 	// Find the article by ID
 	var article models.Article
-	err = coll.FindOne(r.Context(), bson.M{"_id": objectID}).Decode(&article)
+	err = coll.FindOne(r.Context(), bson.M{"_id": id}).Decode(&article)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -88,20 +89,98 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 
 	// Return the article as JSON response
 	w.WriteHeader(http.StatusCreated)
+
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"result": result,
 		"data":   b,
+		"comment":"article created successfully",
+
 	})
+	
 }
 func UpdateArticle(w http.ResponseWriter, r *http.Request) {
+    // Get the ID parameter from the URL
+    id := mux.Vars(r)["id"]
 
-	fmt.Fprintln(w, "Update article")
+    // Convert the ID to an ObjectID if you're using MongoDB
+    _, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    // Get the collection
+    coll := common.GetDBCollection("articles")
+
+    // Define the update filter (in this example, we're using the article's ID)
+    filter := bson.M{"_id": id}
+
+    // Parse the request body to get the update data
+    var updateData map[string]interface{}
+    err = json.NewDecoder(r.Body).Decode(&updateData)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    // Create the update query based on the parsed data
+    updateQuery := bson.M{
+        "$set": updateData,
+    }
+
+    // Perform the update operation
+    updateResult, err := coll.UpdateOne(r.Context(), filter, updateQuery)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Check if any documents were modified
+    if updateResult.ModifiedCount == 0 {
+        http.Error(w, "No article found with the provided ID", http.StatusNotFound)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Article updated successfully"))
 }
+
 
 func DeleteArticle(w http.ResponseWriter, r *http.Request) {
+    // Get the ID parameter from the URL
+    id := mux.Vars(r)["id"]
 
-	fmt.Fprintln(w, "Delete article")
+    // Convert the ID to an ObjectID if you're using MongoDB
+    objectID, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    // Get the collection
+    coll := common.GetDBCollection("articles")
+
+    // Define the deletion filter
+    filter := bson.M{"_id": objectID}
+
+    // Perform the delete operation
+    deleteResult, err := coll.DeleteOne(r.Context(), filter)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Check if any documents were deleted
+    if deleteResult.DeletedCount == 0 {
+        http.Error(w, "No article found with the provided ID", http.StatusNotFound)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Article deleted successfully"))
 }
+
 func DeleteAllArticle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, "Delete all article")
