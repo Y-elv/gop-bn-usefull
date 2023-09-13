@@ -14,7 +14,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/api/v1/articles", handlers.CreateArticle).Methods("POST")
 	r.HandleFunc("/api/v1/articles/{id}", handlers.UpdateArticle).Methods("PUT")
 	r.HandleFunc("/api/v1/articles/{id}", handlers.DeleteArticle).Methods("DELETE")
-	r.HandleFunc("/api/v1/articles/deleteAll", handlers.DeleteAllArticle).Methods("DELETE")
+	r.HandleFunc("/api/v1/articles/delete/deleteAll", handlers.DeleteAllArticle).Methods("DELETE")
 
 	return r
 }

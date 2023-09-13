@@ -182,6 +182,25 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteAllArticle(w http.ResponseWriter, r *http.Request) {
+   // Get the collection
+   coll := common.GetDBCollection("articles")
 
-	fmt.Fprintln(w, "Delete all article")
+   // Define an empty filter to match all documents
+   filter := bson.M{}
+
+   // Perform the delete operation
+   deleteResult, err := coll.DeleteMany(r.Context(), filter)
+   if err != nil {
+	   http.Error(w, err.Error(), http.StatusInternalServerError)
+	   return
+   }
+
+   // Check if any documents were deleted
+   if deleteResult.DeletedCount == 0 {
+	   http.Error(w, "No articles found to delete", http.StatusNotFound)
+	   return
+   }
+
+   w.WriteHeader(http.StatusOK)
+   w.Write([]byte("All articles deleted successfully"))
 }
