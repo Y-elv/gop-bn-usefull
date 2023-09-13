@@ -152,7 +152,7 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
     id := mux.Vars(r)["id"]
 
     // Convert the ID to an ObjectID if you're using MongoDB
-    objectID, err := primitive.ObjectIDFromHex(id)
+   _, err := primitive.ObjectIDFromHex(id)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
@@ -162,7 +162,7 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
     coll := common.GetDBCollection("articles")
 
     // Define the deletion filter
-    filter := bson.M{"_id": objectID}
+    filter := bson.M{"_id": id}
 
     // Perform the delete operation
     deleteResult, err := coll.DeleteOne(r.Context(), filter)
